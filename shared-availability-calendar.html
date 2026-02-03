@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Availability Calendar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .share-section {
+            background: #e0e7ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .share-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .share-link-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .share-link {
+            flex: 1;
+            min-width: 300px;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            background: white;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .google-calendar-section {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .google-calendar-section h3 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+
+        .calendar-import-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .calendar-import-info ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .calendar-import-info li {
+            margin-bottom: 8px;
+        }
+
+        .ical-link {
+            word-break: break-all;
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+
+        .user-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-section label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        #username {
+            padding: 8px 15px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 1em;
+            min-width: 200px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-small:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-view.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-set-user {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .btn-set-user:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        .btn-copy {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .btn-copy:hover {
+            background: #5568d3;
+            border-color: #5568d3;
+        }
+
+        .recurring-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fef3c7;
+            border-radius: 10px;
+        }
+
+        .recurring-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-recurring {
+            padding: 8px 16px;
+            border: 2px solid #d97706;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            color: #333;
+        }
+
+        .btn-recurring.btn-available {
+            border-color: #10b981;
+        }
+
+        .btn-recurring.btn-available:hover {
+            background: #10b981;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-recurring.btn-busy {
+            border-color: #ef4444;
+        }
+
+        .btn-recurring.btn-busy:hover {
+            background: #ef4444;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .current-user-display {
+            text-align: center;
+            padding: 10px;
+            background: #e0e7ff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+        }
+
+        .legend-box.available {
+            background: #10b981;
+        }
+
+        .legend-box.unavailable {
+            background: #ef4444;
+        }
+
+        .legend-box.maybe {
+            background: #f59e0b;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .month-container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e5e7eb;
+        }
+
+        .month-header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .month-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+            font-size: 0.85em;
+            padding: 8px 0;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 2px solid #e5e7eb;
+            background: white;
+            position: relative;
+        }
+
+        .day:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .day.empty {
+            cursor: default;
+            border: none;
+        }
+
+        .day.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .day.available {
+            background: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+
+        .day.unavailable {
+            background: #ef4444;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .day.maybe {
+            background: #f59e0b;
+            color: white;
+            border-color: #d97706;
+        }
+
+        .day.gcal-busy {
+            background: #9333ea;
+            color: white;
+            border-color: #7e22ce;
+        }
+
+        .day.gcal-busy::after {
+            content: '📅';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.6em;
+        }
+
+        /* Combined view styles */
+        .day.all-available {
+            background: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+
+        .day.some-available {
+            background: #fbbf24;
+            color: white;
+            border-color: #f59e0b;
+        }
+
+        .day.none-available {
+            background: #ef4444;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .day.mixed {
+            background: linear-gradient(135deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+            color: white;
+            border-color: #6b7280;
+        }
+
+        .day-tooltip {
+            position: relative;
+        }
+
+        .day-tooltip:hover::after {
+            content: attr(data-users);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 5px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-clear {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-export {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-import {
+            background: #10b981;
+            color: white;
+        }
+
+        .sync-status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .sync-status.synced {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .sync-status.syncing {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .sync-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .legend {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Shared Availability Calendar</h1>
+            <p>Share with friends and sync your Google Calendar</p>
+            
+            <div class="share-section">
+                <h3>🔗 Share This Calendar</h3>
+                <p style="margin-bottom: 10px;">Share this link with friends so they can add their availability:</p>
+                <div class="share-link-container">
+                    <input type="text" class="share-link" id="shareLink" readonly>
+                    <button class="btn-small btn-copy" onclick="copyShareLink()">📋 Copy Link</button>
+                </div>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                    Each person who opens this link can set their own name and mark their availability. Everyone sees the same calendar!
+                </p>
+            </div>
+
+            <div class="google-calendar-section">
+                <h3>📆 Google Calendar Integration</h3>
+                <p style="margin-bottom: 10px;">Import your busy times from Google Calendar:</p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <button class="btn-small btn-import" onclick="showGoogleCalendarInstructions()">📥 Import Google Calendar</button>
+                    <input type="file" id="icsFile" accept=".ics" style="display: none;" onchange="handleICSUpload(event)">
+                    <button class="btn-small btn-import" onclick="document.getElementById('icsFile').click()">📁 Upload ICS File</button>
+                </div>
+                <div id="gcalInstructions" class="calendar-import-info" style="display: none;">
+                    <strong>How to import your Google Calendar:</strong>
+                    <ol>
+                        <li>Go to <a href="https://calendar.google.com" target="_blank">Google Calendar</a></li>
+                        <li>Click Settings ⚙️ → Settings</li>
+                        <li>Find your calendar in the left sidebar and click it</li>
+                        <li>Scroll down to "Integrate calendar"</li>
+                        <li>Copy the "Secret address in iCal format" URL</li>
+                        <li>Paste it below:</li>
+                    </ol>
+                    <input type="text" id="icalUrl" placeholder="Paste your iCal URL here" style="width: 100%; padding: 8px; margin: 10px 0; border: 2px solid #d97706; border-radius: 6px;">
+                    <button class="btn-small btn-import" onclick="importFromICalUrl()">Import Events</button>
+                    <p style="margin-top: 10px; font-size: 0.85em; color: #666;">
+                        ⚠️ Note: Due to browser security, you may need to download the ICS file and upload it instead.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="user-controls">
+                <div class="user-section">
+                    <label for="username">Your Name:</label>
+                    <input type="text" id="username" placeholder="Enter your name" value="">
+                    <button class="btn-small btn-set-user" onclick="setUser()">Set User</button>
+                </div>
+                
+                <div class="view-toggle">
+                    <button class="btn-small btn-view active" data-view="individual" onclick="changeView('individual')">My View</button>
+                    <button class="btn-small btn-view" data-view="combined" onclick="changeView('combined')">Combined View</button>
+                </div>
+            </div>
+
+            <div class="recurring-section">
+                <p style="margin-bottom: 10px;"><strong>Set Recurring Availability:</strong></p>
+                <div class="recurring-buttons">
+                    <button class="btn-small btn-recurring btn-available" onclick="setRecurring(0, 'available')">✓ Sundays Available</button>
+                    <button class="btn-small btn-recurring btn-busy" onclick="setRecurring(0, 'unavailable')">✗ Sundays Busy</button>
+                    
+                    <button class="btn-small btn-recurring btn-available" onclick="setRecurring(1, 'available')">✓ Mondays Available</button>
+                    <button class="btn-small btn-recurring btn-busy" onclick="setRecurring(1, 'unavailable')">✗ Mondays Busy</button>
+                    
+                    <button class="btn-small btn-recurring btn-available" onclick="setRecurring(2, 'available')">✓ Tuesdays Available</button>
+                    <button class="btn-small btn-recurring btn-busy" onclick="setRecurring(2, 'unavailable')">✗ Tuesdays Busy</button>
+                    
+                    <button class="btn-small btn-recurring btn-available" onclick="setRecurring(3, 'available')">✓ Wednesdays Available</button>
+                    <button class="btn-small btn-recurring btn-busy" onclick="setRecurring(3, 'unavailable')">✗ Wednesdays Busy</button>
+                    
+                    <button class="btn-small btn-recurring btn-available" onclick="setRecurring(4, 'available')">✓ Thursdays Available</button>
+                    <button class="btn-small btn-recurring btn-busy" onclick="setRecurring(4, 'unavailable')">✗ Thursdays Busy</button>
+                    
+                    <button class="btn-small btn-recurring btn-available" onclick="setRecurring(5, 'available')">✓ Fridays Available</button>
+                    <button class="btn-small btn-recurring btn-busy" onclick="setRecurring(5, 'unavailable')">✗ Fridays Busy</button>
+                    
+                    <button class="btn-small btn-recurring btn-available" onclick="setRecurring(6, 'available')">✓ Saturdays Available</button>
+                    <button class="btn-small btn-recurring btn-busy" onclick="setRecurring(6, 'unavailable')">✗ Saturdays Busy</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="syncStatus" class="sync-status" style="display: none;"></div>
+        <div id="current-user-info" class="current-user-display" style="display: none;"></div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box available"></div>
+                <span id="legend-available">Available (1 click)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box maybe"></div>
+                <span id="legend-maybe">Maybe (2 clicks)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box unavailable"></div>
+                <span id="legend-unavailable">Unavailable (3 clicks)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: #9333ea;"></div>
+                <span>Google Calendar Busy</span>
+            </div>
+        </div>
+
+        <div id="calendar" class="calendar-grid"></div>
+
+        <div class="actions">
+            <button class="btn btn-clear" onclick="clearAll()">Clear All</button>
+            <button class="btn btn-export" onclick="exportData()">Export Data</button>
+            <button class="btn btn-import" onclick="importData()">Import Data</button>
+        </div>
+    </div>
+
+    <script>
+        const currentYear = new Date().getFullYear();
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        // User management
+        let currentUser = localStorage.getItem('currentUser') || '';
+        let availability = {};
+        let gcalBusyDates = {};
+        let viewMode = 'individual';
+        let calendarId = getOrCreateCalendarId();
+
+        function getOrCreateCalendarId() {
+            let id = localStorage.getItem('calendarId');
+            if (!id) {
+                id = 'cal-' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('calendarId', id);
+            }
+            return id;
+        }
+
+        // Initialize storage listener for real-time updates
+        window.addEventListener('storage', function(e) {
+            if (e.key && e.key.startsWith('user-availability-')) {
+                loadData();
+                createCalendar();
+            }
+        });
+
+        async function initializeApp() {
+            currentUser = localStorage.getItem('currentUser') || '';
+            if (currentUser) {
+                document.getElementById('username').value = currentUser;
+                document.getElementById('current-user-info').style.display = 'block';
+                document.getElementById('current-user-info').textContent = `Logged in as: ${currentUser}`;
+            }
+            
+            // Set share link
+            const shareUrl = window.location.href.split('?')[0] + '?calendar=' + calendarId;
+            document.getElementById('shareLink').value = shareUrl;
+            
+            loadData();
+            loadGCalData();
+            createCalendar();
+            
+            // Check for calendar ID in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedCalId = urlParams.get('calendar');
+            if (sharedCalId) {
+                calendarId = sharedCalId;
+                localStorage.setItem('calendarId', calendarId);
+                document.getElementById('shareLink').value = shareUrl;
+            }
+            
+            setSyncStatus('synced', 'All changes saved locally. Share the link above with friends!');
+        }
+
+        function setUser() {
+            const username = document.getElementById('username').value.trim();
+            if (!username) {
+                alert('Please enter your name');
+                return;
+            }
+            currentUser = username;
+            localStorage.setItem('currentUser', currentUser);
+            document.getElementById('current-user-info').style.display = 'block';
+            document.getElementById('current-user-info').textContent = `Logged in as: ${currentUser}`;
+            loadData();
+            createCalendar();
+            alert(`Welcome, ${currentUser}! Your availability will be visible to everyone with this calendar link.`);
+        }
+
+        function loadData() {
+            if (currentUser) {
+                const stored = localStorage.getItem(`user-availability-${currentUser}-${calendarId}`);
+                availability = stored ? JSON.parse(stored) : {};
+            } else {
+                availability = {};
+            }
+        }
+
+        function loadGCalData() {
+            const stored = localStorage.getItem(`gcal-busy-${currentUser}-${calendarId}`);
+            gcalBusyDates = stored ? JSON.parse(stored) : {};
+        }
+
+        async function loadSharedData() {
+            try {
+                const result = await window.storage.list(`availability-${calendarId}-`, true);
+                const allUserData = {};
+                
+                if (result && result.keys) {
+                    for (const key of result.keys) {
+                        const data = await window.storage.get(key, true);
+                        if (data && data.value) {
+                            const username = key.replace(`availability-${calendarId}-`, '');
+                            allUserData[username] = JSON.parse(data.value);
+                        }
+                    }
+                }
+                
+                return allUserData;
+            } catch (error) {
+                console.log('Shared storage not available, using local storage');
+                return getLocalUsersData();
+            }
+        }
+
+        function getLocalUsersData() {
+            const allUserData = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith(`user-availability-`) && key.includes(calendarId)) {
+                    const username = key.replace(`user-availability-`, '').replace(`-${calendarId}`, '');
+                    allUserData[username] = JSON.parse(localStorage.getItem(key));
+                }
+            }
+            return allUserData;
+        }
+
+        function changeView(mode) {
+            viewMode = mode;
+            document.querySelectorAll('.btn-view').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-view="${mode}"]`).classList.add('active');
+            
+            if (mode === 'combined') {
+                document.getElementById('legend-available').textContent = 'Everyone Available';
+                document.getElementById('legend-maybe').textContent = 'Some Available';
+                document.getElementById('legend-unavailable').textContent = 'None Available';
+            } else {
+                document.getElementById('legend-available').textContent = 'Available (1 click)';
+                document.getElementById('legend-maybe').textContent = 'Maybe (2 clicks)';
+                document.getElementById('legend-unavailable').textContent = 'Unavailable (3 clicks)';
+            }
+            
+            createCalendar();
+        }
+
+        async function createCalendar() {
+            const calendarDiv = document.getElementById('calendar');
+            calendarDiv.innerHTML = '';
+
+            let allUserData = {};
+            if (viewMode === 'combined') {
+                allUserData = await loadSharedData();
+            }
+
+            for (let month = 0; month < 12; month++) {
+                const monthContainer = document.createElement('div');
+                monthContainer.className = 'month-container';
+
+                const monthHeader = document.createElement('div');
+                monthHeader.className = 'month-header';
+                monthHeader.innerHTML = `<div class="month-name">${monthNames[month]} ${currentYear}</div>`;
+                monthContainer.appendChild(monthHeader);
+
+                const weekdaysDiv = document.createElement('div');
+                weekdaysDiv.className = 'weekdays';
+                weekdayNames.forEach(day => {
+                    const weekdayDiv = document.createElement('div');
+                    weekdayDiv.className = 'weekday';
+                    weekdayDiv.textContent = day;
+                    weekdaysDiv.appendChild(weekdayDiv);
+                });
+                monthContainer.appendChild(weekdaysDiv);
+
+                const daysDiv = document.createElement('div');
+                daysDiv.className = 'days';
+
+                const firstDay = new Date(currentYear, month, 1).getDay();
+                const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'day empty';
+                    daysDiv.appendChild(emptyDiv);
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'day';
+                    dayDiv.textContent = day;
+                    
+                    const dateKey = `${currentYear}-${month}-${day}`;
+
+                    // Check if this date is marked as busy in Google Calendar
+                    const isGCalBusy = gcalBusyDates[dateKey];
+
+                    if (viewMode === 'individual') {
+                        if (isGCalBusy) {
+                            dayDiv.classList.add('gcal-busy');
+                            dayDiv.title = 'Busy (from Google Calendar)';
+                        } else if (availability[dateKey]) {
+                            dayDiv.classList.add(availability[dateKey]);
+                        }
+                        
+                        if (currentUser && !isGCalBusy) {
+                            dayDiv.onclick = function() {
+                                toggleAvailability(dateKey, dayDiv);
+                            };
+                        }
+                    } else {
+                        // Combined view
+                        const stats = getCombinedStats(dateKey, allUserData);
+                        if (stats.total > 0) {
+                            dayDiv.classList.add('day-tooltip');
+                            dayDiv.setAttribute('data-users', stats.tooltip);
+                            
+                            if (stats.available === stats.total) {
+                                dayDiv.classList.add('all-available');
+                            } else if (stats.unavailable === stats.total) {
+                                dayDiv.classList.add('none-available');
+                            } else if (stats.available > 0) {
+                                dayDiv.classList.add('some-available');
+                            } else {
+                                dayDiv.classList.add('mixed');
+                            }
+                        }
+                    }
+
+                    daysDiv.appendChild(dayDiv);
+                }
+
+                monthContainer.appendChild(daysDiv);
+                calendarDiv.appendChild(monthContainer);
+            }
+        }
+
+        function getCombinedStats(dateKey, allUserData) {
+            const stats = {
+                available: 0,
+                unavailable: 0,
+                maybe: 0,
+                total: 0,
+                users: []
+            };
+
+            for (const [username, userData] of Object.entries(allUserData)) {
+                if (userData[dateKey]) {
+                    stats.total++;
+                    const status = userData[dateKey];
+                    if (status === 'available') stats.available++;
+                    else if (status === 'unavailable') stats.unavailable++;
+                    else if (status === 'maybe') stats.maybe++;
+                    
+                    stats.users.push(`${username}: ${status}`);
+                }
+            }
+
+            stats.tooltip = stats.users.length > 0 ? stats.users.join(', ') : 'No data';
+            return stats;
+        }
+
+        function toggleAvailability(dateKey, element) {
+            if (!currentUser) {
+                alert('Please set your name first!');
+                return;
+            }
+
+            const currentState = availability[dateKey];
+            
+            element.classList.remove('available', 'maybe', 'unavailable');
+            
+            if (!currentState) {
+                availability[dateKey] = 'available';
+                element.classList.add('available');
+            } else if (currentState === 'available') {
+                availability[dateKey] = 'maybe';
+                element.classList.add('maybe');
+            } else if (currentState === 'maybe') {
+                availability[dateKey] = 'unavailable';
+                element.classList.add('unavailable');
+            } else {
+                delete availability[dateKey];
+            }
+
+            saveData();
+        }
+
+        async function saveData() {
+            if (!currentUser) return;
+            
+            setSyncStatus('syncing', 'Saving...');
+            
+            // Save to local storage
+            localStorage.setItem(`user-availability-${currentUser}-${calendarId}`, JSON.stringify(availability));
+            
+            // Try to save to shared storage
+            try {
+                await window.storage.set(`availability-${calendarId}-${currentUser}`, JSON.stringify(availability), true);
+                setSyncStatus('synced', '✓ Saved and synced with others');
+                setTimeout(() => {
+                    document.getElementById('syncStatus').style.display = 'none';
+                }, 2000);
+            } catch (error) {
+                console.log('Shared storage not available');
+                setSyncStatus('synced', '✓ Saved locally');
+                setTimeout(() => {
+                    document.getElementById('syncStatus').style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        function setSyncStatus(status, message) {
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.className = `sync-status ${status}`;
+            statusDiv.textContent = message;
+        }
+
+        function setRecurring(dayOfWeek, status) {
+            if (!currentUser) {
+                alert('Please set your name first!');
+                return;
+            }
+
+            const dayName = weekdayNames[dayOfWeek];
+            const statusText = status === 'available' ? 'available' : 'busy';
+            
+            if (!confirm(`Set all ${dayName}s in ${currentYear} as ${statusText}?`)) {
+                return;
+            }
+
+            let count = 0;
+            for (let month = 0; month < 12; month++) {
+                const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(currentYear, month, day);
+                    if (date.getDay() === dayOfWeek) {
+                        const dateKey = `${currentYear}-${month}-${day}`;
+                        // Don't override Google Calendar busy dates
+                        if (!gcalBusyDates[dateKey]) {
+                            availability[dateKey] = status;
+                            count++;
+                        }
+                    }
+                }
+            }
+
+            saveData();
+            createCalendar();
+            alert(`${count} ${dayName}s marked as ${statusText}!`);
+        }
+
+        function clearAll() {
+            if (!currentUser) {
+                alert('Please set your name first!');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to clear all your availability data?')) {
+                availability = {};
+                saveData();
+                createCalendar();
+            }
+        }
+
+        function exportData() {
+            if (!currentUser) {
+                alert('Please set your name first!');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(availability, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `availability-${currentUser}-${currentYear}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            if (!currentUser) {
+                alert('Please set your name first!');
+                return;
+            }
+            
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const imported = JSON.parse(event.target.result);
+                        availability = imported;
+                        saveData();
+                        createCalendar();
+                        alert('Data imported successfully!');
+                    } catch (error) {
+                        alert('Error importing data. Please check the file format.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function copyShareLink() {
+            const linkInput = document.getElementById('shareLink');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999);
+            
+            navigator.clipboard.writeText(linkInput.value).then(() => {
+                alert('Link copied! Share it with your friends so they can add their availability.');
+            }).catch(() => {
+                alert('Please manually copy the link above');
+            });
+        }
+
+        function showGoogleCalendarInstructions() {
+            const instructions = document.getElementById('gcalInstructions');
+            instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function importFromICalUrl() {
+            const url = document.getElementById('icalUrl').value.trim();
+            if (!url) {
+                alert('Please paste your iCal URL');
+                return;
+            }
+
+            if (!currentUser) {
+                alert('Please set your name first!');
+                return;
+            }
+
+            alert('Due to browser security restrictions, please:\n1. Download the ICS file from Google Calendar\n2. Click "Upload ICS File" button above\n3. Select the downloaded file');
+        }
+
+        function handleICSUpload(event) {
+            if (!currentUser) {
+                alert('Please set your name first!');
+                return;
+            }
+
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const icsData = e.target.result;
+                parseICS(icsData);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseICS(icsData) {
+            const lines = icsData.split('\n');
+            let inEvent = false;
+            let eventStart = null;
+            let eventEnd = null;
+            let busyCount = 0;
+
+            for (let line of lines) {
+                line = line.trim();
+                
+                if (line === 'BEGIN:VEVENT') {
+                    inEvent = true;
+                    eventStart = null;
+                    eventEnd = null;
+                } else if (line === 'END:VEVENT' && inEvent) {
+                    if (eventStart && eventEnd) {
+                        markBusyPeriod(eventStart, eventEnd);
+                        busyCount++;
+                    }
+                    inEvent = false;
+                } else if (inEvent) {
+                    if (line.startsWith('DTSTART')) {
+                        eventStart = parseDateFromICS(line);
+                    } else if (line.startsWith('DTEND')) {
+                        eventEnd = parseDateFromICS(line);
+                    }
+                }
+            }
+
+            localStorage.setItem(`gcal-busy-${currentUser}-${calendarId}`, JSON.stringify(gcalBusyDates));
+            createCalendar();
+            alert(`Successfully imported ${busyCount} busy periods from Google Calendar!`);
+        }
+
+        function parseDateFromICS(line) {
+            // Extract date from ICS format
+            const match = line.match(/[:;](\d{8})/);
+            if (match) {
+                const dateStr = match[1];
+                const year = parseInt(dateStr.substr(0, 4));
+                const month = parseInt(dateStr.substr(4, 2)) - 1;
+                const day = parseInt(dateStr.substr(6, 2));
+                return new Date(year, month, day);
+            }
+            return null;
+        }
+
+        function markBusyPeriod(startDate, endDate) {
+            if (!startDate || !endDate) return;
+            if (startDate.getFullYear() !== currentYear && endDate.getFullYear() !== currentYear) return;
+
+            const current = new Date(startDate);
+            while (current <= endDate) {
+                if (current.getFullYear() === currentYear) {
+                    const dateKey = `${current.getFullYear()}-${current.getMonth()}-${current.getDate()}`;
+                    gcalBusyDates[dateKey] = true;
+                    // Also mark as unavailable in user's availability
+                    availability[dateKey] = 'unavailable';
+                }
+                current.setDate(current.getDate() + 1);
+            }
+        }
+
+        initializeApp();
+    </script>
+</body>
+</html>
